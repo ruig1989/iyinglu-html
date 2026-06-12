@@ -6,6 +6,11 @@
     <meta name="description" content="嬴麓国际——您的全球人才战略合伙人。始于2007，成于2025，专注海外留学、人才服务、企业赋能与战略研究。">
     <meta name="keywords" content="留学,来华留学,国际人才,企业培训,人才引进,济南留学">
     <title>嬴麓国际 | 您的全球人才战略合伙人</title>
+    <!-- 字体预连接优化 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -51,13 +56,16 @@
         .nav-links a:hover { color: var(--secondary); }
         .mobile-menu { display: none; font-size: 1.5rem; cursor: pointer; color: var(--primary); }
 
+        /* 英雄区铺满整个屏幕，内容垂直居中 */
         .hero {
             position: relative;
             background-image: url('https://images.pexels.com/photos/2614818/pexels-photo-2614818.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop');
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
-            padding: 100px 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
             color: white;
         }
         .hero::before {
@@ -70,7 +78,7 @@
             background: rgba(0,0,0,0.55);
             z-index: 0;
         }
-        .hero .container { position: relative; z-index: 1; }
+        .hero .container { position: relative; z-index: 1; width: 100%; }
         .hero-content {
             background: rgba(255,255,255,0.75);
             backdrop-filter: blur(4px);
@@ -102,7 +110,7 @@
         .hero-bg-en .line1, .hero-bg-en .line2 { font-size: 2rem; letter-spacing: 4px; color: rgba(255,255,255,0.65); text-shadow: 0 2px 6px rgba(0,0,0,0.3); }
 
         @media (max-width: 768px) {
-            .hero { padding: 60px 0; }
+            .hero { min-height: 100svh; }
             .hero-content { padding: 28px 20px; max-width: 100%; }
             .hero-title { font-size: 2rem; }
             .hero-stats { gap: 20px; flex-wrap: wrap; }
@@ -192,7 +200,6 @@
         input, textarea { width: 100%; padding: 14px 18px; border: 1px solid var(--gray-border); border-radius: 16px; font-family: inherit; font-size: 0.9rem; transition: border 0.2s; background: var(--white); }
         input:focus, textarea:focus { outline: none; border-color: var(--secondary); }
         
-        /* 表单动作区域：按钮固定宽度，验证码容器撑满剩余宽度并右对齐 */
         .form-actions {
             display: flex;
             align-items: center;
@@ -200,23 +207,11 @@
             flex-wrap: wrap;
             margin-top: 20px;
         }
-        .btn-primary {
-            flex-shrink: 0;
-        }
-        .cf-turnstile {
-            flex: 1;
-            display: flex;
-            justify-content: flex-end;
-            margin: 0;
-        }
+        .btn-primary { flex-shrink: 0; }
+        .cf-turnstile { flex: 1; display: flex; justify-content: flex-end; margin: 0; }
         @media (max-width: 640px) {
-            .form-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .cf-turnstile {
-                justify-content: center;
-            }
+            .form-actions { flex-direction: column; align-items: stretch; }
+            .cf-turnstile { justify-content: center; }
         }
 
         .stat-highlight-card { background: white; border-radius: var(--card-radius); padding: 20px 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-border); transition: var(--transition-smooth); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
@@ -429,8 +424,11 @@
                             
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary" id="submitBtn" style="border:none; cursor:pointer;" disabled>提交</button>
-                                <!-- 移除了 data-size="compact"，恢复默认尺寸，并通过 CSS 实现右对齐 -->
-                                <div class="cf-turnstile" data-sitekey="0x4AAAAAADiYXlkL0lT4bXRa" data-callback="onTurnstileSuccess"></div>
+                                <div class="cf-turnstile" 
+                                     data-sitekey="0x4AAAAAADiYXlkL0lT4bXRa" 
+                                     data-callback="onTurnstileSuccess"
+                                     data-size="invisible"
+                                     data-execution="execute"></div>
                             </div>
                         </form>
                         <p id="formFeedback" style="text-align:center; margin-top:16px; font-size:0.9rem; display:none;"></p>
@@ -465,10 +463,16 @@
 
     <script>
         let turnstilePassed = false;
+        let formSubmitting = false;
+
         function onTurnstileSuccess(token) {
             turnstilePassed = true;
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn) submitBtn.disabled = false;
+            if (formSubmitting) {
+                formSubmitting = false;
+                document.getElementById('demoForm').dispatchEvent(new Event('submit'));
+            }
         }
         
         window.onTurnstileError = function() {
@@ -476,6 +480,14 @@
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn) submitBtn.disabled = true;
         };
+        
+        window.addEventListener('load', function() {
+            if (typeof turnstile !== 'undefined') {
+                turnstile.ready(function() {
+                    turnstile.execute('.cf-turnstile');
+                });
+            }
+        });
         
         const menuBtn = document.getElementById('mobileMenuBtn');
         const navLinksContainer = document.getElementById('navLinks');
@@ -506,10 +518,15 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             if (!turnstilePassed) {
-                feedback.textContent = '请完成验证后再提交';
-                feedback.style.color = '#c0392b';
-                feedback.style.display = 'block';
-                setTimeout(() => { feedback.style.display = 'none'; }, 3000);
+                if (typeof turnstile !== 'undefined') {
+                    formSubmitting = true;
+                    turnstile.execute('.cf-turnstile');
+                } else {
+                    feedback.textContent = '验证服务未加载，请刷新页面';
+                    feedback.style.color = '#c0392b';
+                    feedback.style.display = 'block';
+                    setTimeout(() => { feedback.style.display = 'none'; }, 3000);
+                }
                 return;
             }
             
@@ -554,7 +571,8 @@
                     feedback.style.color = '#27ae60';
                     form.reset();
                     if (typeof turnstile !== 'undefined') {
-                        turnstile.reset();
+                        turnstile.reset('.cf-turnstile');
+                        turnstile.execute('.cf-turnstile');
                     }
                     turnstilePassed = false;
                     submitBtn.disabled = true;
