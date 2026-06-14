@@ -6,11 +6,13 @@
     <meta name="description" content="嬴麓国际——您的全球人才战略合伙人。始于2007，成于2025，专注海外留学、人才服务、企业赋能与战略研究。">
     <meta name="keywords" content="留学,来华留学,国际人才,企业培训,人才引进,济南留学">
     <title>嬴麓国际 | 您的全球人才战略合伙人</title>
+    <!-- 字体预连接优化 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 正常加载 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
@@ -44,6 +46,7 @@
         .nav-links a:hover { color: var(--secondary); }
         .mobile-menu { display: none; font-size: 1.5rem; cursor: pointer; color: var(--primary); }
 
+        /* 英雄区：铺满视口，内容垂直居中，英文标语右对齐且紧贴内容框 */
         .hero {
             position: relative;
             background-image: url('https://images.pexels.com/photos/2614818/pexels-photo-2614818.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop');
@@ -89,6 +92,7 @@
         .stat-item h3 { font-size: 1.8rem; color: var(--secondary); font-weight: 700; letter-spacing: -0.5px; }
         .stat-item p { font-size: 0.8rem; color: var(--gray); }
 
+        /* 英文标语：右对齐，紧贴 hero-content 底部 */
         .hero-bg-en {
             align-self: flex-end;
             text-align: right;
@@ -201,8 +205,8 @@
         
         .form-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 20px; }
         .btn-primary { flex-shrink: 0; }
-        .cf-turnstile { flex: 1; display: flex; justify-content: flex-end; margin: 0; }
-        @media (max-width: 640px) { .form-actions { flex-direction: column; align-items: stretch; } .cf-turnstile { justify-content: center; } }
+        .cf-turnstile { margin: 0; }
+        @media (max-width: 640px) { .form-actions { flex-direction: column; align-items: stretch; } .cf-turnstile { margin-bottom: 0; } }
 
         .stat-highlight-card { background: white; border-radius: var(--card-radius); padding: 20px 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-border); transition: var(--transition-smooth); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
         .stat-highlight-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgba(184,146,74,0.2); }
@@ -415,7 +419,8 @@
                             <div class="form-group"><textarea name="message" rows="4" placeholder="留言内容"></textarea></div>
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary" id="submitBtn" style="border:none; cursor:pointer;" disabled>提交</button>
-                                <div class="cf-turnstile" data-sitekey="0x4AAAAAADiYXlkL0lT4bXRa" data-callback="onTurnstileSuccess" data-size="invisible" data-execution="execute"></div>
+                                <!-- 使用可见模式（正常显示复选框），用户勾选后启用按钮 -->
+                                <div class="cf-turnstile" data-sitekey="0x4AAAAAADiYXlkL0lT4bXRa" data-callback="onTurnstileSuccess"></div>
                             </div>
                         </form>
                         <p id="formFeedback" style="text-align:center; margin-top:16px; font-size:0.9rem; display:none;"></p>
@@ -450,16 +455,13 @@
 
     <script>
         let turnstilePassed = false;
-        let formSubmitting = false;
+        let formSubmitting = false;  // 保留但隐藏模式下不再使用，可见模式下无需
 
         function onTurnstileSuccess(token) {
             turnstilePassed = true;
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn) submitBtn.disabled = false;
-            if (formSubmitting) {
-                formSubmitting = false;
-                document.getElementById('demoForm').dispatchEvent(new Event('submit'));
-            }
+            // 删除原来隐藏模式下用于自动重试的逻辑，因为可见模式下用户勾选后直接启用按钮，无需自动提交
         }
         
         window.onTurnstileError = function() {
@@ -468,14 +470,7 @@
             if (submitBtn) submitBtn.disabled = true;
         };
         
-        window.addEventListener('load', function() {
-            if (typeof turnstile !== 'undefined') {
-                turnstile.ready(function() {
-                    turnstile.execute('.cf-turnstile');
-                });
-            }
-        });
-        
+        // 移动端菜单
         const menuBtn = document.getElementById('mobileMenuBtn');
         const navLinksContainer = document.getElementById('navLinks');
         if (menuBtn) menuBtn.addEventListener('click', () => navLinksContainer.classList.toggle('mobile-nav-open'));
@@ -505,15 +500,10 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             if (!turnstilePassed) {
-                if (typeof turnstile !== 'undefined') {
-                    formSubmitting = true;
-                    turnstile.execute('.cf-turnstile');
-                } else {
-                    feedback.textContent = '验证服务未加载，请刷新页面';
-                    feedback.style.color = '#c0392b';
-                    feedback.style.display = 'block';
-                    setTimeout(() => { feedback.style.display = 'none'; }, 3000);
-                }
+                feedback.textContent = '请先完成验证';
+                feedback.style.color = '#c0392b';
+                feedback.style.display = 'block';
+                setTimeout(() => { feedback.style.display = 'none'; }, 3000);
                 return;
             }
             
@@ -557,9 +547,9 @@
                     feedback.textContent = '留言已发送，我们会尽快回复！';
                     feedback.style.color = '#27ae60';
                     form.reset();
+                    // 重置 Turnstile 状态，以便下次提交需要重新验证
                     if (typeof turnstile !== 'undefined') {
                         turnstile.reset('.cf-turnstile');
-                        turnstile.execute('.cf-turnstile');
                     }
                     turnstilePassed = false;
                     submitBtn.disabled = true;
